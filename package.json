@@ -1,0 +1,11 @@
+{
+  "name": "la_belle_nathalie_admin",
+  "version": "1.0.0",
+  "description": "Manager app for la_belle_nathalie's resources",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "macrijuan",
+  "license": "ISC"
+}
