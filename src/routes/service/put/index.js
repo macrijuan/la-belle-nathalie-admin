@@ -5,7 +5,7 @@ const { Op } = require("sequelize");
 const format = require("./controllers/format.js");
 const exists = require("./controllers/existing.js")
 
-const { Service, Sub_service } = require("../../../db.js");
+const { Service } = require("../../../db.js");
 
 router.put( "/put_service",
   format,
