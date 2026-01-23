@@ -4,6 +4,7 @@ const { unknown } = require("../../../../errors.js");
 
 const format = ( req, res, next ) =>{
   try{
+    console.log( req.body );
     if(
       !Array.isArray( req.body.ids )
       || req.body.ids.find( id => typeof id !== 'number' )

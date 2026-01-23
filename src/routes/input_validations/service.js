@@ -4,7 +4,7 @@ const servNameVal = ( name ) => {
   if(
     typeof name !== 'string'
     || name.length > 35 
-    || !name.length
+    || name.length < 1
   ){
     console.log( console.log( "INVALID NAME" ) );
     return unknown;
