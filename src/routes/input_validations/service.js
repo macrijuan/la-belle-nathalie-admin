@@ -26,6 +26,7 @@ const shiftVal = ( arrTime ) => {
     || !( /^(?:[01]\d|2[0-3]):[0-5]\d$/ ).test( arrTime[ 1 ] )
     || !( arrTime[ 0 ] < arrTime[ 1 ] )
   ){
+    console.log( "arrTime: ", arrTime );
     console.log( "STRINGS INSIDE ARRAY OF EMPLOYEE SHIFT TIME MUST REPRESENT TIME IN HH:MM FORMAT AND THE FIRST VALUE MUST BE SMALLER THAN THE SECOND" );
     return unknown;
   };
