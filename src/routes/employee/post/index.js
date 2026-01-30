@@ -7,7 +7,7 @@ const exists = require("./controllers/exists.js");
 const { Employee } = require("../../../db.js");
 const { unknown } = require("../../../errors.js");
 
-router.post( "/employee/post_employee",
+router.post( "/post_employee",
   format,
   exists,
   async( req, res, next ) => {

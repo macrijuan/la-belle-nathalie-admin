@@ -3,6 +3,8 @@ const { nameVal, idenVal, shiftVal } = require("../../../input_validations/emplo
 
 const format = ( req, res, next ) => {
   try{
+    console.log( "req.body:" );
+    console.log( req.body );
     const recivedKeys = Object.keys( req.body.update ).length;
     if( recivedKeys > 4 ){
       console.log( "req.body.update -> TOO MANY KEYS" );
@@ -13,11 +15,13 @@ const format = ( req, res, next ) => {
       const first_name = nameVal( req.body.update.first_name, "nombre" );
       if( first_name ) return res.status( 403 ).json( first_name );
       allowedKeys ++;
+      req.body.update.first_name = req.body.update.first_name.toUpperCase();
     };
     if( 'last_name' in req.body.update ){
-    const last_name = nameVal( req.body.update.last_name, "apellido" );
-    if( last_name ) return res.status( 403 ).json( last_name );
+      const last_name = nameVal( req.body.update.last_name, "apellido" );
+      if( last_name ) return res.status( 403 ).json( last_name );
       allowedKeys ++;
+      req.body.update.last_name = req.body.update.last_name.toUpperCase();
     };
     if( 'identity' in req.body.update ){
       const identity = idenVal( req.body.update.identity );
@@ -30,6 +34,7 @@ const format = ( req, res, next ) => {
       allowedKeys ++;
     };
     if( allowedKeys < 1 || allowedKeys > 4 || Object.keys( req.body.update ).length !== allowedKeys ) return res.status( 400 ).json( unknown );
+    next();
   }catch( err ){
     next( err );
   };

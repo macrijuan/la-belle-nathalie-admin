@@ -5,7 +5,7 @@ const { Op } = require("sequelize");
 const { Employee } = require("../../db.js");
 const { unknown } = require("../../errors");
 
-router.delete( "/employee/delete_employees",
+router.delete( "/delete_employees",
   async( req, res, next ) => {
     try{
       if( !Array.isArray( req.body.ids )

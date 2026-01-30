@@ -7,18 +7,18 @@ const nameVal = ( name, key ) => {
     return custom_error( key, strict_length( key, 1, 35 ) );
   };
   if ( !( /^\p{L}+(?:\s\p{L}+)*$/u ).test( normalized ) ) {
-    return custom_error( key, strict_char_type( key, 'letras y espacios (no consecutivos)' ) );
+    return custom_error( key, strict_char_type( key, 'letters and not chained spaces' ) );
   };
 };
 
 const idenVal = ( iden ) => {
-  if( typeof iden !== 'number' ) return unknown;
-  if( iden < 45000000 || iden > 100000000 ) return custom_error( "identidad", strict_size( '45.000.000', '100.000.000' ) );
+  if( typeof iden !== 'number' || Number.isNaN( iden ) ) return unknown;
+  if( iden < 4000000 || iden > 100000000 ) return custom_error( "identity", strict_size( '45.000.000', '100.000.000' ) );
 };
 
 const shiftVal = ( shift ) => {
   if( typeof shift !== 'string' ) return unknown;
-  if( !( shift === 'am' || shift === 'pm' ) ) return custom_error( "turno", not_valid( "turno" ) );
+  if( !( shift === 'am' || shift === 'pm' ) ) return custom_error( "shift", not_valid( "shift" ) );
 };
 
 module.exports = { nameVal, idenVal, shiftVal };
