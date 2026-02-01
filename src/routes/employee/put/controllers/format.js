@@ -3,8 +3,6 @@ const { nameVal, idenVal, shiftVal } = require("../../../input_validations/emplo
 
 const format = ( req, res, next ) => {
   try{
-    console.log( "req.body:" );
-    console.log( req.body );
     const recivedKeys = Object.keys( req.body.update ).length;
     if( recivedKeys > 4 ){
       console.log( "req.body.update -> TOO MANY KEYS" );

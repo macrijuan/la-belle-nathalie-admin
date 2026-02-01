@@ -13,9 +13,9 @@ router.put( "/put_employees",
   exists,
   async( req, res, next ) => {
     try{
-      console.log( "I'M HERE" );
+      console.log( req.body.update );
       const emp = await Employee.update( req.body.update, { where:{ id: { [ Op.in ]: req.body.ids } } } );
-      if( emp ) res.sendStatus( 204 );
+      if( emp && ( emp [ 0 ] !== 0 ) ) res.sendStatus( 204 );
       else res.status( 500 ).json( unknown );
     }catch( err ){
       next( err );
