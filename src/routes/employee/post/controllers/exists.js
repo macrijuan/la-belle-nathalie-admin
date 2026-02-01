@@ -1,5 +1,5 @@
-const Employee = require("../../../../models/Employee");
-const { custom_error, existing } = require("../../../../errors");
+const { Employee } = require("../../../../db.js");
+const { custom_error, existing } = require("../../../../errors.js");
 
 const exists = async ( req, res, next ) => {
   try{

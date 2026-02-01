@@ -3,25 +3,31 @@ const { nameVal, idenVal, shiftVal } = require("../../../input_validations/emplo
 
 const format = ( req, res, next ) => {
   try{
+    console.log( "req.body" );
+    console.log( req.body );
     let allowedKeys = 0;
 
     const first_name = nameVal( req.body.first_name, "nombre" );
-    if( first_name ) return res.status( 403 ).json( first_name );
+    if( first_name ){ console.log( "first_name failed" ); return res.status( 403 ).json( first_name ) };
+    req.body.first_name = req.body.first_name.toUpperCase();
     allowedKeys ++;
 
     const last_name = nameVal( req.body.last_name, "apellido" );
-    if( last_name ) return res.status( 403 ).json( last_name );
+    if( last_name ){ console.log( "last_name failed" ); return res.status( 403 ).json( last_name ); };
+    req.body.last_name = req.body.last_name.toUpperCase();
     allowedKeys ++;
     
     const identity = idenVal( req.body.identity );
-    if( identity ) return res.status( 403 ).json( identity );
+    if( identity ){ console.log( "identity failed" ); return res.status( 403 ).json( identity ); };
     allowedKeys ++;
 
     const shift = shiftVal( req.body.shift );
-    if( shift ) return res.status( 403 ).json( shift );
+    if( shift ){ console.log( "shift failed" ); return res.status( 403 ).json( shift ); };
     allowedKeys ++;
 
     if( allowedKeys < 1 || allowedKeys > 4 || Object.keys( req.body ).length !== allowedKeys ) return res.status( 400 ).json( unknown );
+
+    next();
   }catch( err ){
     next( err );
   };
