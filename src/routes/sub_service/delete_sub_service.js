@@ -2,10 +2,10 @@ const { Router } = require( "express" );
 const router = Router();
 
 const { Op } = require("sequelize");
-const { Service } = require("../../db.js");
+const { Sub_service } = require("../../db.js");
 const { not_found, unknown } = require("../../errors.js");
 
-router.delete( "/delete_services", 
+router.delete( "/delete_sub_services",
   async( req, res, next ) => {
     try{
       
@@ -19,9 +19,9 @@ router.delete( "/delete_services",
         return res.status( 400 ).json( unknown );
       };
 
-      const serv = await Service.destroy( { where:{ id:{ [ Op.in ]: req.body } } } );
+      const sub_serv = await Sub_service.destroy( { where:{ id:{ [ Op.in ]: req.body } } } );
 
-      if( !serv ) res.status( 404 ).json( not_found( "Service" ) );
+      if( !sub_serv ) res.status( 404 ).json( not_found( "Sub service" ) );
       else res.status( 204 );
 
     }catch( err ){
