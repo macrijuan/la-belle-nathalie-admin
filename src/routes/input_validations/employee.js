@@ -21,4 +21,9 @@ const shiftVal = ( shift ) => {
   if( !( shift === 'am' || shift === 'pm' ) ) return custom_error( "shift", not_valid( "shift" ) );
 };
 
-module.exports = { nameVal, idenVal, shiftVal };
+const serviceIdVal = ( serviceId ) => {
+  if( typeof serviceId !== 'number' || Number.isNaN( serviceId ) ) return unknown;
+  if( serviceId < 1 || serviceId > 10000 ) return custom_error( "shift", not_valid( "shift" ) );
+};
+
+module.exports = { nameVal, idenVal, shiftVal, serviceIdVal };

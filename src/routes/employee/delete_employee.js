@@ -21,8 +21,8 @@ router.delete( "/delete_employees",
 
       const deleted = await Employee.destroy( { where:{ id:{ [ Op.in ]: req.body } } } );
 
-      if( deleted ) res.sendStatus( 204 );
-      else res.status( 404 ).json( not_found( "Employee" ) );
+      if( !deleted ) res.status( 404 ).json( not_found( "Employee" ) );
+      else res.sendStatus( 204 );
       
     }catch( err ){
       next( err );

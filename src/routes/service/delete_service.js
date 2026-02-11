@@ -22,7 +22,7 @@ router.delete( "/delete_services",
       const serv = await Service.destroy( { where:{ id:{ [ Op.in ]: req.body } } } );
 
       if( !serv ) res.status( 404 ).json( not_found( "Service" ) );
-      else res.status( 204 );
+      else res.sendStatus( 204 );
 
     }catch( err ){
       next( err );

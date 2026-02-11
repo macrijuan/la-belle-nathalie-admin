@@ -1,3 +1,5 @@
+const { unknown } = require("../../errors.js");
+
 const subServNameVal = ( name ) => {
   if(
     typeof name !== 'string'
@@ -26,7 +28,7 @@ const subServDetailVal = ( detail ) => {
     || detail.length > 500
     || detail.length < 1
   ){
-    console.log( console.log( "INVALID MINS" ) );
+    console.log( console.log( "INVALID DETAIL" ) );
     return unknown;
   };
 };
@@ -37,7 +39,7 @@ const subServServIdlVal = ( servId ) => {
     || servId > 10000
     || servId < 1
   ){
-    console.log( console.log( "INVALID MINS" ) );
+    console.log( "INVALID SERVICEID" );
     return unknown;
   };
 };

@@ -13,7 +13,7 @@ router.post( "/post_employee",
   async( req, res, next ) => {
     try{
       const emp = await Employee.create( req.body );
-      if( emp ) return res.status( 200 ).json( emp.id );
+      if( emp ) res.status( 200 ).json( emp.id );
       else res.status( 500 ).json( unknown );
     }catch( err ){
       next( err );

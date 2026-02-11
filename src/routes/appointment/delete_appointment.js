@@ -1,26 +1,33 @@
-const { Router }=require("express");
+const { Router } = require( "express" );
 const router = Router();
 
-const { unknown, not_found } = require("../../errors.js");
-
+const { Op } = require("sequelize");
 const { Appointment } = require("../../db.js");
+const { not_found, unknown } = require("../../errors.js");
 
-
-router.delete( "/delete_appointment/:id",
+router.delete( "/delete_appointments",
 	async( req, res, next ) => {
 		try{
-			if( !( /^[1-9]\d{0,4}$/ ).test( req.params.id ) ) return res.status( 403 ).json( unknown );
-			const appo = await Appointment.destroy( { where:{ id:req.params.id } } );
-			console.log( appo );
-			if( appo === 0 ){
-				res.status( 404 ).json( not_found( "Appointment" ) );
-			}else{
-				res.sendStatus( 204 );
+			if(
+				!Array.isArray( req.body )
+				|| !req.body.length
+				|| req.body.find( id => typeof id !== 'number' )
+				|| req.body.find( id => id % 1 )
+			){
+				console.log( "req.body must be an array containing integers" );
+				return res.status( 400 ).json( unknown );
 			};
+			
+			const appo = await Appointment.destroy( { where:{ id:{ [ Op.in ]: req.body } } } );
+			console.log( );
+
+			if( !appo ) res.status( 404 ).json( not_found( "Appointments" ) );
+			else res.sendStatus( 204 );
+
 		}catch( err ){
 			next( err );
 		};
-  }
+	}
 );
 
 module.exports = router;
