@@ -9,7 +9,6 @@ router.delete("/sign_out",
       // const deletedSession = await upstashClient.del( req.cookies.sid );
       // console.log( "deleted session:", deletedSession );
       res.sendStatus( 204 );
-      
     }catch( err ){
       next( err );
     };

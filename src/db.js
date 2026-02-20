@@ -11,7 +11,6 @@ let sequelize = process.env.ENVIRONMENT !== "development"
 const modelDefiners = [
   require("./models/Admin.js"),
   require("./models/Appointment.js"),
-  require("./models/Client.js"),
   require("./models/Employee.js"),
   require("./models/Service.js"),
   require("./models/Sub_service.js"),
@@ -27,28 +26,25 @@ let capsEntries = entries.map((entry) => {
 sequelize.models = Object.fromEntries( capsEntries );
 
 
-const { Client, User, Appointment, Employee, Service, Sub_service } = sequelize.models;
+const { User, Appointment, Employee, Service, Sub_service } = sequelize.models;
 
-Client.hasOne( User )
-User.belongsTo( Client )
+User.hasMany( Appointment, { onDelete: 'CASCADE' } );
+Appointment.belongsTo( User );
 
-Client.hasMany( Appointment );
-Appointment.belongsTo( Client );
-
-Employee.hasMany( Appointment );
+Employee.hasMany( Appointment, { onDelete: 'CASCADE' } );
 Appointment.belongsTo( Employee );
 
 Appointment.belongsToMany( Sub_service, { through: "appo_sub_servs", timestamps: false, onDelete: 'CASCADE' } );
 Sub_service.belongsToMany( Appointment, { through: "appo_sub_servs", timestamps: false, onDelete: 'CASCADE' } );
 
-Service.hasMany( Sub_service );
+Service.hasMany( Sub_service, { onDelete: 'CASCADE' } );
 Sub_service.belongsTo( Service );
 
-Service.hasMany( Appointment, { foreignKey: "serviceId" } );
-Appointment.belongsTo( Service, { foreignKey: "serviceId" } );
-
-Service.hasMany( Employee );
+Service.hasMany( Employee, { onDelete: 'CASCADE' } );
 Employee.belongsTo( Service );
+
+Service.hasMany( Appointment, { foreignKey: "serviceId", onDelete: 'CASCADE' } );
+Appointment.belongsTo( Service, { foreignKey: "serviceId" } );
 
 module.exports = {
   ...sequelize.models,

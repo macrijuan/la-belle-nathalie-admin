@@ -8,7 +8,7 @@ const { not_found, unknown } = require("../../errors.js");
 router.delete( "/delete_services", 
   async( req, res, next ) => {
     try{
-      
+
       if(
         !Array.isArray( req.body )
         || !req.body.length

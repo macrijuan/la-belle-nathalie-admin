@@ -21,19 +21,19 @@ module.exports = sequelize=>{
     timestamps:false,
     indexes:[
       {
-        fields: [ 'clientId', 'day', 'start_time', 'serviceId', 'employeeId'  ]
+        fields: [ 'userId', 'day', 'start_time', 'serviceId', 'employeeId'  ]
       },
       {
-        fields: [ 'day', 'start_time', 'clientId', 'employeeId'  ]
+        fields: [ 'day', 'start_time', 'userId', 'employeeId'  ]
       },
       {
-        fields: [ 'clientId' ]
+        fields: [ 'userId' ]
       },
       {
         fields: [ 'employeeId'  ]
       },
       {
-        fields: [ 'day', 'clientId', 'start_time'  ]
+        fields: [ 'day', 'userId', 'start_time'  ]
       },
       {
         fields: [ 'day', 'employeeId', 'start_time'  ]
