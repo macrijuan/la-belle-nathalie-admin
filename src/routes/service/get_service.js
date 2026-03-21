@@ -3,7 +3,7 @@ const router = Router();
 
 const { Service, Sub_service } = require("../../db.js");
 
-router.get( "/get_services", 
+router.get( "/get_services",
   async( req, res, next ) => {
     try{
       const serv = await Service.findAll({
