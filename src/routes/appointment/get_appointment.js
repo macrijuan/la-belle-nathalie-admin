@@ -38,4 +38,25 @@ router.get( "/get_appointments", async ( req, res, next ) => {
   }
 } );
 
+
+router.get( "/get_all_appos/:empId",
+  ( req, res, next ) => {
+    console.log( req.params );
+    if( !( typeof req.params.empId === 'string' && ( /^-?[1-9]\d{0,8}$/ ).test( req.params.empId ) ) ) return next( new Error( 'req.params.empId -> empId must be an integer (number)' ) );
+    next();
+  },
+  async ( req, res, next ) => {
+    try{
+      const appointments = await Appointment.findAll({
+        attributes:[ "day", "start_time", "end_time", "employeeId" ],
+        where:{ employeeId: Number( req.params.empId ) }
+      });
+      res.json( appointments );
+    }catch( err ){
+      next( err );
+    }
+  }
+);
+
+
 module.exports = router;
