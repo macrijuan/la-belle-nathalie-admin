@@ -27,9 +27,10 @@ const timeVal = ( time, rutErrs, prop ) => {
 const idVal = ( id, rutErrs, prop ) => {
   if(
     typeof id !== "number"
-    || id > 999
+    || !Number.isSafeInteger( appo )
+    || id > 99999
     || id < 1
-  ) rutErrs[prop] = invalid_format;
+  ) rutErrs[ prop ] = invalid_format;
 };
 
 module.exports = {

@@ -36,7 +36,7 @@ const subServDetailVal = ( detail ) => {
 const subServServIdlVal = ( servId ) => {
   if(
     typeof servId !== 'number'
-    || servId > 10000
+    || !Number.isSafeInteger( servId )
     || servId < 1
   ){
     console.log( "INVALID SERVICEID" );

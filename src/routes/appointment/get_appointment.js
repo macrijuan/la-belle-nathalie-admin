@@ -28,7 +28,7 @@ router.get( "/get_appointments", async ( req, res, next ) => {
       },
       include:[
         { model: Service, attributes:[ "id", "name" ] },
-        { model: Sub_service, attributes:[ "id", "name" ], through:{ attributes:[] } },
+        { model: Sub_service, attributes:[ "id", "name", "mins" ], through:{ attributes:[] } },
         { model: Employee, attributes:[ "id", "first_name", "last_name" ] }
       ]
     });
