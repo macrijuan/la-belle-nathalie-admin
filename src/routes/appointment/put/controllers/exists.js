@@ -42,6 +42,7 @@ const exists = async ( req, res, next ) => {
     next();
 
   }catch( err ){
+    await res.locals.tran.rollback();
     next( err );
   };
 };

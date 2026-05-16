@@ -7,6 +7,7 @@ module.exports={
   not_found: ( dataName ) => custom_error( "not_found", `${dataName} not found.` ),
   sign_in_not_found: ( dataName ) => custom_error( "sign_in_not_found", `There is no ${dataName} with such email and password.\nCheck the entered data.`  ),
   //SINGLE ERROR WITH FIXED MESSAGE.
+  retry_failed: { errors:{ error: "There was a temporary error. Try again." } },
   req_limit: { errors:{ req_limit: 'Too many requests, please try again later.' } },
   no_session: { errors: { session: "The session has expired. Please, log in again." } },
   unknown: { errors:{ unknown: "An unknown error occured." } },
