@@ -14,7 +14,7 @@ const format = ( req, res, next ) => {
     if( recivedKeys.length > 2 || recivedKeys.length < 1 ) throw new Error( 'Only 1 or 2 keys allowed in req.body' );
     
     const allowed = new Set( [ 'add', 'del' ] );
-    if( recivedKeys.some( rk => !allowed.has( rk ) ) ) throw new Error( 'Only "service", "add" and "del" keys are allowed in req.body' );
+    if( recivedKeys.some( rk => !allowed.has( rk ) ) ) throw new Error( 'Only  "add" and "del" keys are allowed in req.body' );
     
     let appo = req.params.appoId;
     if ( typeof appo !== 'string' || !/^[1-9]\d*$/.test( appo ) ){
@@ -25,20 +25,9 @@ const format = ( req, res, next ) => {
       typeof appo !== "number"
     || !Number.isSafeInteger( appo )
     || appo > 99999
-    || appo < 0 ){
-      throw new Error( 'params.appoId must be a positive integer (case 2)' );
+    || appo < 1 ){
+      throw new Error( 'params.appoId must be an integer between 1 and 99999' );
     };
-
-    // const serv = req.body.service;
-    // if(
-    //   typeof serv !== 'number'
-    //   || !Number.isSafeInteger( serv )
-    //   || serv < 0
-    // ) throw new Error( 'body.service must be a positive integer' );
-    
-    // if( !( ( "add" in req.body ) || ( "del" in req.body ) ) ){
-    //   throw new Error( 'body.add and body.del not found' );
-    // };
 
     if( "add" in req.body ){
       if ( !Array.isArray( req.body.add )  ){
