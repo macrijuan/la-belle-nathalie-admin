@@ -41,8 +41,9 @@ const format = ( req, res, next ) => {
           typeof subServId !== 'number'
           || !Number.isSafeInteger( subServId )
           || subServId < 1
-        ) throw new Error( 'Elements to add must be non-zero integers' );
+        ) throw new Error( 'All elements to add must be non-zero integers' );
       };
+      if( new Set( req.body.add ).size !== req.body.add.length ) throw new Error( "There are duplicated IDs in body.add" );
     };
 
     if( "del" in req.body ){
@@ -57,12 +58,11 @@ const format = ( req, res, next ) => {
           typeof subServId !== 'number'
           || !Number.isSafeInteger( subServId )
           || subServId < 1
-        ) throw new Error( 'Elements to delete must be non-zero integers' );
+        ) throw new Error( 'All elements to delete must be non-zero integers' );
       };
+      if( new Set( req.body.del ).size !== req.body.del.length ) throw new Error( "There are duplicated IDs in body.del" );
     };
 
-    if( new Set( req.body.add ).size !== req.body.add.length ) throw new Error( "There are duplicated IDs in body.add" );
-    if( new Set( req.body.del ).size !== req.body.del.length ) throw new Error( "There are duplicated IDs in body.del" );
 
     for( const id of req.body.add ){
       if( req.body.del.includes( id ) ) throw new Error( "IDs can't be present in both body.add and body.del" );

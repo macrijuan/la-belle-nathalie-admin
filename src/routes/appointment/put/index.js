@@ -22,11 +22,11 @@ router.put( "/put_appointment/:appoId",
   async( req, res, next ) => {
     try{
       if( "add" in req.body ){
-
         let bindArgs = undefined;
         let query = undefined;
 
         if( "del" in req.body ){
+          console.log( "HAS ADD AND DEL");
           bindArgs = [ Number( req.params.appoId ), req.body.add, req.body.del, req.body.add.length, req.body.del.length ];
           query = `
 WITH
@@ -62,7 +62,7 @@ WITH
       AND
       NOT EXISTS(
         SELECT 1
-        FROM unnest($2::int[]) AS recived_ss(id)
+        FROM unnest($2::int[]) AS recived_ss(iz|d)
         JOIN appo_sub_servs
           ON
             recived_ss.id = appo_sub_servs."subServiceId"
@@ -161,6 +161,7 @@ WHERE
 ;
 `
         }else{
+          console.log( "HAS JUST ADD");
           bindArgs = [ req.body.servId, Number( req.params.appoId ), req.body.add ]
           query = `
 WITH
@@ -295,7 +296,7 @@ WHERE
 ;
 `;
         };
-
+        console.log( "HAS JUST DEL" );
         const queryRes = await conn.query(
           query,
           {
