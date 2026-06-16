@@ -62,11 +62,12 @@ const format = ( req, res, next ) => {
       };
       if( new Set( req.body.del ).size !== req.body.del.length ) throw new Error( "There are duplicated IDs in body.del" );
     };
-
-
+    
+    if( "del" in req.body && "add" in req.body )
     for( const id of req.body.add ){
       if( req.body.del.includes( id ) ) throw new Error( "IDs can't be present in both body.add and body.del" );
     };
+
     
     next();
 
