@@ -162,7 +162,7 @@ WHERE
 `
         }else{
           console.log( "HAS JUST ADD");
-          bindArgs = [ req.params.appoId, Number( req.params.appoId ), req.body.add ]
+          bindArgs = [ Number( req.params.appoId ), req.body.add, req.body.add.length ]
           query = `
 WITH
   appo AS (
@@ -183,7 +183,7 @@ WITH
     SELECT
       EXISTS (SELECT 1 FROM appo)
       AND
-      (SELECT COUNT(id) FROM sub_servs_add) = $4
+      (SELECT COUNT(id) FROM sub_servs_add) = $3
       AND
       NOT EXISTS(
         SELECT 1
