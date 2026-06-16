@@ -18,7 +18,6 @@ const { retry_failed } = require("../../../errors.js");
 
 router.put( "/put_appointment/:appoId",
   format,
-  exists,
   async( req, res, next ) => {
     try{
       if( "add" in req.body ){
