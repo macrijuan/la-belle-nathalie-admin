@@ -162,7 +162,7 @@ WHERE
 `
         }else{
           console.log( "HAS JUST ADD");
-          bindArgs = [ req.body.servId, Number( req.params.appoId ), req.body.add ]
+          bindArgs = [ req.params.appoId, Number( req.params.appoId ), req.body.add ]
           query = `
 WITH
   appo AS (
@@ -179,21 +179,11 @@ WITH
         ss.id = recived_ss.id
         AND ss."serviceId" = appo."serviceId"
   ),
-  sub_servs_del AS (
-    SELECT "subServiceId"
-    FROM unnest($3::int[]) AS recived_ss(id)
-    JOIN appo_sub_servs
-      ON
-        recived_ss.id = appo_sub_servs."subServiceId"
-        AND appo_sub_servs."appointmentId" = $1
-  ),
   validations AS (
     SELECT
       EXISTS (SELECT 1 FROM appo)
       AND
       (SELECT COUNT(id) FROM sub_servs_add) = $4
-      AND
-      (SELECT COUNT("subServiceId") FROM sub_servs_del) = $5
       AND
       NOT EXISTS(
         SELECT 1
@@ -232,22 +222,14 @@ WITH
     WHERE (SELECT ok FROM validations)
   ),
   mins_to_add AS (
-    SELECT COALESCE(SUM(mins), 0) AS value
-    FROM unnest($2::int[]) AS recived_ss(rid)
-    JOIN sub_servs_add
-    ON
-      (SELECT ok FROM validations)
-      AND recived_ss.rid = sub_servs_add.id
+  SELECT COALESCE(SUM(mins), 0) AS value
+  FROM unnest($2::int[]) AS recived_ss(rid)
+  JOIN sub_servs_add
+  ON
+    (SELECT ok FROM validations)
+    AND recived_ss.rid = sub_servs_add.id
   ),
-  mins_to_del AS (
-    SELECT COALESCE(SUM(mins), 0) AS value
-    FROM unnest($3::int[]) AS recived_ss(rid)
-    JOIN sub_services ss
-    ON
-      (SELECT ok FROM validations)
-      AND recived_ss.rid = ss.id
-  ),
-  available_time AS (
+    available_time AS (
     SELECT (
       end_of_available_time.value - appo.start_time
     ) AS value
@@ -256,25 +238,15 @@ WITH
     WHERE (SELECT ok FROM validations)
   ),
   new_appo_duration AS (
-    SELECT ((appo.end_time - appo.start_time) + (mins_to_add.value - mins_to_del.value) * INTERVAL '1 minute') AS value
+    SELECT ((appo.end_time - appo.start_time) + mins_to_add.value * INTERVAL '1 minute') AS value
     FROM appo
     CROSS JOIN mins_to_add
-    CROSS JOIN mins_to_del
   ),
   is_possible AS (
     SELECT (available_time.value >= new_appo_duration.value) AS ok
     FROM available_time
     CROSS JOIN new_appo_duration
     WHERE (SELECT ok FROM validations)
-  ),
-  remove_sub_servs AS (
-    DELETE
-    FROM appo_sub_servs
-    WHERE
-      (SELECT ok FROM validations)
-      AND (SELECT ok FROM is_possible)
-      AND "appointmentId" = $1
-      AND "subServiceId" = ANY($3::int[])
   ),
   join_sub_servs AS (
     INSERT INTO appo_sub_servs("appointmentId", "subServiceId")
@@ -296,7 +268,6 @@ WHERE
 ;
 `;
         };
-        console.log( "HAS JUST DEL" );
         const queryRes = await conn.query(
           query,
           {
@@ -306,6 +277,7 @@ WHERE
           }
         );
       }else{
+        console.log( "HAS JUST DEL" );
         const queryRes = await appo_sub_servs.destroy( {
           where:{
             appointmentId: req.params.appoId,

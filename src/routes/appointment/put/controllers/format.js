@@ -68,7 +68,6 @@ const format = ( req, res, next ) => {
       if( req.body.del.includes( id ) ) throw new Error( "IDs can't be present in both body.add and body.del" );
     };
 
-    
     next();
 
   }catch( err ){
