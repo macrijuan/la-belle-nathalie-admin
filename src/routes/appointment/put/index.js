@@ -20,284 +20,344 @@ router.put( "/put_appointment/:appoId",
   format,
   async( req, res, next ) => {
     try{
+      let bindArgs = undefined;
+      let query = undefined;
       if( "add" in req.body ){
-        let bindArgs = undefined;
-        let query = undefined;
 
         if( "del" in req.body ){
+
           console.log( "HAS ADD AND DEL");
           bindArgs = [ Number( req.params.appoId ), req.body.add, req.body.del, req.body.add.length, req.body.del.length ];
           query = `
-WITH
-  appo AS (
-    SELECT id, day, start_time, end_time, "employeeId", "serviceId"
-    FROM appointments
-    WHERE id = $1
-  ),
-  sub_servs_add AS (
-    SELECT ss.id, ss.mins
-    FROM unnest($2::int[]) AS recived_ss(id)
-    CROSS JOIN appo
-    JOIN sub_services ss
-      ON
-        ss.id = recived_ss.id
-        AND ss."serviceId" = appo."serviceId"
-  ),
-  sub_servs_del AS (
-    SELECT "subServiceId"
-    FROM unnest($3::int[]) AS recived_ss(id)
-    JOIN appo_sub_servs
-      ON
-        recived_ss.id = appo_sub_servs."subServiceId"
-        AND appo_sub_servs."appointmentId" = $1
-  ),
-  validations AS (
-    SELECT
-      EXISTS (SELECT 1 FROM appo)
-      AND
-      (SELECT COUNT(id) FROM sub_servs_add) = $4
-      AND
-      (SELECT COUNT("subServiceId") FROM sub_servs_del) = $5
-      AND
-      NOT EXISTS(
-        SELECT 1
-        FROM unnest($2::int[]) AS recived_ss(iz|d)
-        JOIN appo_sub_servs
-          ON
-            recived_ss.id = appo_sub_servs."subServiceId"
-            AND appo_sub_servs."appointmentId" = $1
-      )
-      AS ok
-  ),
-  end_of_available_time AS (
-    SELECT
-      COALESCE(
-        (
-          SELECT MIN(a.start_time) AS value
-          FROM appointments a
-          CROSS JOIN appo
-          WHERE a.day = appo.day
-            AND a."employeeId" = appo."employeeId"
-            AND a.start_time > appo.start_time
-        ),
-        (
-        SELECT 
-          CASE
-            WHEN e.shift = 'am' THEN s.am[2] ELSE s.pm[2]
-          END AS value
-        FROM appo a
-        INNER JOIN services s
-          ON a."serviceId" = s.id
-        INNER JOIN  employees e
-          ON a."employeeId" = e.id
-        )
-      )
-    AS value
-    WHERE (SELECT ok FROM validations)
-  ),
-  mins_to_add AS (
-  SELECT COALESCE(SUM(mins), 0) AS value
-  FROM unnest($2::int[]) AS recived_ss(rid)
-  JOIN sub_servs_add
-  ON
-    (SELECT ok FROM validations)
-    AND recived_ss.rid = sub_servs_add.id
-  ),
-  mins_to_del AS (
-    SELECT COALESCE(SUM(mins), 0) AS value
-    FROM unnest($3::int[]) AS recived_ss(rid)
-    JOIN sub_services ss
-    ON
-      (SELECT ok FROM validations)
-      AND recived_ss.rid = ss.id
-  ),
-    available_time AS (
-    SELECT (
-      end_of_available_time.value - appo.start_time
-    ) AS value
-    FROM appo
-    CROSS JOIN end_of_available_time
-    WHERE (SELECT ok FROM validations)
-  ),
-  new_appo_duration AS (
-    SELECT ((appo.end_time - appo.start_time) + (mins_to_add.value - mins_to_del.value) * INTERVAL '1 minute') AS value
-    FROM appo
-    CROSS JOIN mins_to_add
-    CROSS JOIN mins_to_del
-  ),
-  is_possible AS (
-    SELECT (available_time.value >= new_appo_duration.value) AS ok
-    FROM available_time
-    CROSS JOIN new_appo_duration
-    WHERE (SELECT ok FROM validations)
-  ),
-  remove_sub_servs AS (
-    DELETE
-    FROM appo_sub_servs
-    WHERE
-      (SELECT ok FROM validations)
-      AND (SELECT ok FROM is_possible)
-      AND "appointmentId" = $1
-      AND "subServiceId" = ANY($3::int[])
-  ),
-  join_sub_servs AS (
-    INSERT INTO appo_sub_servs("appointmentId", "subServiceId")
-    SELECT $1, id FROM sub_servs_add
-    WHERE
-      (SELECT ok FROM validations)
-      AND (SELECT ok FROM is_possible)
-  )
-UPDATE appointments
-  SET end_time = (
-    SELECT (appo.start_time + nad.value)
-    FROM new_appo_duration nad
-    CROSS JOIN appo
-  )
-WHERE
-  (SELECT ok FROM validations)
-  AND (SELECT ok FROM is_possible)
-  AND id = (SELECT id FROM appo)
-;
-`
+          WITH
+            appo AS (
+              SELECT id, day, start_time, end_time, "employeeId", "serviceId"
+              FROM appointments
+              WHERE id = $1
+            ),
+            sub_servs_add AS (
+              SELECT ss.id, ss.mins
+              FROM unnest($2::int[]) AS recived_ss(id)
+              CROSS JOIN appo
+              JOIN sub_services ss
+                ON
+                  ss.id = recived_ss.id
+                  AND ss."serviceId" = appo."serviceId"
+            ),
+            sub_servs_del AS (
+              SELECT "subServiceId"
+              FROM unnest($3::int[]) AS recived_ss(id)
+              JOIN appo_sub_servs
+                ON
+                  recived_ss.id = appo_sub_servs."subServiceId"
+                  AND appo_sub_servs."appointmentId" = $1
+            ),
+            validations AS (
+              SELECT
+                EXISTS (SELECT 1 FROM appo)
+                AND
+                (SELECT COUNT(id) FROM sub_servs_add) = $4
+                AND
+                (SELECT COUNT("subServiceId") FROM sub_servs_del) = $5
+                AND
+                NOT EXISTS(
+                  SELECT 1
+                  FROM unnest($2::int[]) AS recived_ss(iz|d)
+                  JOIN appo_sub_servs
+                    ON
+                      recived_ss.id = appo_sub_servs."subServiceId"
+                      AND appo_sub_servs."appointmentId" = $1
+                )
+                AS ok
+            ),
+            end_of_available_time AS (
+              SELECT
+                COALESCE(
+                  (
+                    SELECT MIN(a.start_time) AS value
+                    FROM appointments a
+                    CROSS JOIN appo
+                    WHERE a.day = appo.day
+                      AND a."employeeId" = appo."employeeId"
+                      AND a.start_time > appo.start_time
+                  ),
+                  (
+                  SELECT 
+                    CASE
+                      WHEN e.shift = 'am' THEN s.am[2] ELSE s.pm[2]
+                    END AS value
+                  FROM appo a
+                  INNER JOIN services s
+                    ON a."serviceId" = s.id
+                  INNER JOIN  employees e
+                    ON a."employeeId" = e.id
+                  )
+                )
+              AS value
+              WHERE (SELECT ok FROM validations)
+            ),
+            mins_to_add AS (
+              SELECT COALESCE(SUM(mins), 0) AS value
+              FROM unnest($2::int[]) AS recived_ss(rid)
+              JOIN sub_servs_add
+              ON
+                (SELECT ok FROM validations)
+                AND recived_ss.rid = sub_servs_add.id
+            ),
+            mins_to_del AS (
+              SELECT COALESCE(SUM(mins), 0) AS value
+              FROM unnest($3::int[]) AS recived_ss(rid)
+              JOIN sub_services ss
+              ON
+                (SELECT ok FROM validations)
+                AND recived_ss.rid = ss.id
+            ),
+            available_time AS (
+              SELECT (
+                end_of_available_time.value - appo.start_time
+              ) AS value
+              FROM appo
+              CROSS JOIN end_of_available_time
+              WHERE (SELECT ok FROM validations)
+            ),
+            new_appo_duration AS (
+              SELECT ((appo.end_time - appo.start_time) + (mins_to_add.value - mins_to_del.value) * INTERVAL '1 minute') AS value
+              FROM appo
+              CROSS JOIN mins_to_add
+              CROSS JOIN mins_to_del
+            ),
+            is_possible AS (
+              SELECT (available_time.value >= new_appo_duration.value) AS ok
+              FROM available_time
+              CROSS JOIN new_appo_duration
+              WHERE (SELECT ok FROM validations)
+            ),
+            remove_sub_servs AS (
+              DELETE
+              FROM appo_sub_servs
+              WHERE
+                (SELECT ok FROM validations)
+                AND (SELECT ok FROM is_possible)
+                AND "appointmentId" = $1
+                AND "subServiceId" = ANY($3::int[])
+            ),
+            join_sub_servs AS (
+              INSERT INTO appo_sub_servs("appointmentId", "subServiceId")
+              SELECT $1, id FROM sub_servs_add
+              WHERE
+                (SELECT ok FROM validations)
+                AND (SELECT ok FROM is_possible)
+            )
+          UPDATE appointments
+            SET end_time = (
+              SELECT (appo.start_time + nad.value)
+              FROM new_appo_duration nad
+              CROSS JOIN appo
+            )
+          WHERE
+            (SELECT ok FROM validations)
+            AND (SELECT ok FROM is_possible)
+            AND id = (SELECT id FROM appo)
+          ;
+          `;
+
         }else{
+
           console.log( "HAS JUST ADD");
           bindArgs = [ Number( req.params.appoId ), req.body.add, req.body.add.length ]
           query = `
-WITH
-  appo AS (
-    SELECT id, day, start_time, end_time, "employeeId", "serviceId"
-    FROM appointments
-    WHERE id = $1
-  ),
-  sub_servs_add AS (
-    SELECT ss.id, ss.mins
-    FROM unnest($2::int[]) AS recived_ss(id)
-    CROSS JOIN appo
-    JOIN sub_services ss
-      ON
-        ss.id = recived_ss.id
-        AND ss."serviceId" = appo."serviceId"
-  ),
-  validations AS (
-    SELECT
-      EXISTS (SELECT 1 FROM appo)
-      AND
-      (SELECT COUNT(id) FROM sub_servs_add) = $3
-      AND
-      NOT EXISTS(
-        SELECT 1
-        FROM unnest($2::int[]) AS recived_ss(id)
-        JOIN appo_sub_servs
-          ON
-            recived_ss.id = appo_sub_servs."subServiceId"
-            AND appo_sub_servs."appointmentId" = $1
-      )
-      AS ok
-  ),
-  end_of_available_time AS (
-    SELECT
-      COALESCE(
-        (
-          SELECT MIN(a.start_time) AS value
-          FROM appointments a
-          CROSS JOIN appo
-          WHERE a.day = appo.day
-            AND a."employeeId" = appo."employeeId"
-            AND a.start_time > appo.start_time
-        ),
-        (
-        SELECT 
-          CASE
-            WHEN e.shift = 'am' THEN s.am[2] ELSE s.pm[2]
-          END AS value
-        FROM appo a
-        INNER JOIN services s
-          ON a."serviceId" = s.id
-        INNER JOIN  employees e
-          ON a."employeeId" = e.id
-        )
-      )
-    AS value
-    WHERE (SELECT ok FROM validations)
-  ),
-  mins_to_add AS (
-  SELECT COALESCE(SUM(mins), 0) AS value
-  FROM unnest($2::int[]) AS recived_ss(rid)
-  JOIN sub_servs_add
-  ON
-    (SELECT ok FROM validations)
-    AND recived_ss.rid = sub_servs_add.id
-  ),
-    available_time AS (
-    SELECT (
-      end_of_available_time.value - appo.start_time
-    ) AS value
-    FROM appo
-    CROSS JOIN end_of_available_time
-    WHERE (SELECT ok FROM validations)
-  ),
-  new_appo_duration AS (
-    SELECT ((appo.end_time - appo.start_time) + mins_to_add.value * INTERVAL '1 minute') AS value
-    FROM appo
-    CROSS JOIN mins_to_add
-  ),
-  is_possible AS (
-    SELECT (available_time.value >= new_appo_duration.value) AS ok
-    FROM available_time
-    CROSS JOIN new_appo_duration
-    WHERE (SELECT ok FROM validations)
-  ),
-  join_sub_servs AS (
-    INSERT INTO appo_sub_servs("appointmentId", "subServiceId")
-    SELECT $1, id FROM sub_servs_add
-    WHERE
-      (SELECT ok FROM validations)
-      AND (SELECT ok FROM is_possible)
-  )
-UPDATE appointments
-  SET end_time = (
-    SELECT (appo.start_time + nad.value)
-    FROM new_appo_duration nad
-    CROSS JOIN appo
-  )
-WHERE
-  (SELECT ok FROM validations)
-  AND (SELECT ok FROM is_possible)
-  AND id = (SELECT id FROM appo)
-;
-`;
+          WITH
+            appo AS (
+              SELECT id, day, start_time, end_time, "employeeId", "serviceId"
+              FROM appointments
+              WHERE id = $1
+            ),
+            sub_servs_add AS (
+              SELECT ss.id, ss.mins
+              FROM unnest($2::int[]) AS recived_ss(id)
+              CROSS JOIN appo
+              JOIN sub_services ss
+                ON
+                  ss.id = recived_ss.id
+                  AND ss."serviceId" = appo."serviceId"
+            ),
+            validations AS (
+              SELECT
+                EXISTS (SELECT 1 FROM appo)
+                AND
+                (SELECT COUNT(id) FROM sub_servs_add) = $3
+                AND
+                NOT EXISTS(
+                  SELECT 1
+                  FROM unnest($2::int[]) AS recived_ss(id)
+                  JOIN appo_sub_servs
+                    ON
+                      recived_ss.id = appo_sub_servs."subServiceId"
+                      AND appo_sub_servs."appointmentId" = $1
+                )
+                AS ok
+            ),
+            end_of_available_time AS (
+              SELECT
+                COALESCE(
+                  (
+                    SELECT MIN(a.start_time) AS value
+                    FROM appointments a
+                    CROSS JOIN appo
+                    WHERE a.day = appo.day
+                      AND a."employeeId" = appo."employeeId"
+                      AND a.start_time > appo.start_time
+                  ),
+                  (
+                  SELECT 
+                    CASE
+                      WHEN e.shift = 'am' THEN s.am[2] ELSE s.pm[2]
+                    END AS value
+                  FROM appo a
+                  INNER JOIN services s
+                    ON a."serviceId" = s.id
+                  INNER JOIN  employees e
+                    ON a."employeeId" = e.id
+                  )
+                )
+              AS value
+              WHERE (SELECT ok FROM validations)
+            ),
+            mins_to_add AS (
+              SELECT COALESCE(SUM(mins), 0) AS value
+              FROM unnest($2::int[]) AS recived_ss(rid)
+              JOIN sub_servs_add
+              ON
+                (SELECT ok FROM validations)
+                AND recived_ss.rid = sub_servs_add.id
+            ),
+            available_time AS (
+              SELECT (
+                end_of_available_time.value - appo.start_time
+              ) AS value
+              FROM appo
+              CROSS JOIN end_of_available_time
+              WHERE (SELECT ok FROM validations)
+            ),
+            new_appo_duration AS (
+              SELECT ((appo.end_time - appo.start_time) + mins_to_add.value * INTERVAL '1 minute') AS value
+              FROM appo
+              CROSS JOIN mins_to_add
+            ),
+            is_possible AS (
+              SELECT (available_time.value >= new_appo_duration.value) AS ok
+              FROM available_time
+              CROSS JOIN new_appo_duration
+              WHERE (SELECT ok FROM validations)
+            ),
+            join_sub_servs AS (
+              INSERT INTO appo_sub_servs("appointmentId", "subServiceId")
+              SELECT $1, id FROM sub_servs_add
+              WHERE
+                (SELECT ok FROM validations)
+                AND (SELECT ok FROM is_possible)
+            )
+          UPDATE appointments
+            SET end_time = (
+              SELECT (appo.start_time + nad.value)
+              FROM new_appo_duration nad
+              CROSS JOIN appo
+            )
+          WHERE
+            (SELECT ok FROM validations)
+            AND (SELECT ok FROM is_possible)
+            AND id = (SELECT id FROM appo)
+          ;
+          `;
         };
-        const queryRes = await conn.query(
-          query,
-          {
-            bind: bindArgs,
-            type:"UPDATE",
-            transaction: res.locals.tran
-          }
-        );
+
       }else{
+
         console.log( "HAS JUST DEL" );
-        const queryRes = await appo_sub_servs.destroy( {
-          where:{
-            appointmentId: req.params.appoId,
-            subServiceId:{ [ Op.in ]: req.body.del } 
-          },
-          transaction: res.locals.tran
-        } );
+        bindArgs = [ Number( req.params.appoId ), req.body.del, req.body.del.length ];
+        query =
+        `WITH
+          appo AS (
+            SELECT id, day, start_time, end_time, "employeeId", "serviceId"
+            FROM appointments
+            WHERE id = $1
+          ),
+          joined_sub_servs AS (
+            SELECT "subServiceId"
+            FROM appo_sub_servs
+            WHERE "appointmentId" = $1
+          ),
+          sub_servs_del AS (
+            SELECT "subServiceId"
+            FROM unnest($2::int[]) AS recived_ss(id)
+            JOIN joined_sub_servs jss
+              ON
+                recived_ss.id = ss."subServiceId"
+                AND ss."appointmentId" = $1
+          ),
+          validations AS (
+            SELECT
+              EXISTS (SELECT 1 FROM appo)
+              AND
+              (SELECT COUNT("subServiceId") FROM joined_sub_servs) <> $3
+              AND
+              (SELECT COUNT("subServiceId") FROM sub_servs_del) = $3
+              AS ok
+          ),
+          mins_to_del AS (
+            SELECT COALESCE(SUM(mins), 0) AS value
+            FROM unnest($2::int[]) AS recived_ss(rid)
+            JOIN sub_services ss
+            ON
+              (SELECT ok FROM validations)
+              AND recived_ss.rid = ss.id
+          ),
+          new_appo_duration AS (
+            SELECT ((appo.end_time - appo.start_time) - mins_to_del.value * INTERVAL '1 minute') AS value
+            FROM appo
+            CROSS JOIN mins_to_del
+          ),
+          remove_sub_servs AS (
+            DELETE
+            FROM appo_sub_servs
+            WHERE
+              (SELECT ok FROM validations)
+              AND "appointmentId" = $1
+              AND "subServiceId" = ANY($2::int[])
+          )
+        UPDATE appointments
+          SET end_time = (
+            SELECT (appo.start_time + nad.value)
+            FROM new_appo_duration nad
+            CROSS JOIN appo
+          )
+        WHERE
+          (SELECT ok FROM validations)
+          AND id = (SELECT id FROM appo)
+        ;`
       };
-      const transaction = await res.locals.tran.commit();
-      if( transaction?.error.code === 40001 ){//CockroachDB asking for retry
+
+      let queryRes = await conn.query( query, { bind: bindArgs, type: "UPDATE" } );
+        
+      if( queryRes.error && queryRes.error.code === 40001 ){//CockroachDB asking for retry
         let _try = 1;
-        retryLoop: while( _try<5 ){
-          const retryTran = await res.locals.tran.commit();
-          if( !transaction?.error.code === 40001 ) break retryLoop;
-          _try++;
-        };
-        if( _try === 5 ) return res.status( 403 ).json( retry_failed );
+        retryLoop: while( _try < 5 ){
+        queryRes = await conn.query( query, { bind: bindArgs, type: "UPDATE" } );
+        if(
+          !queryRes.error
+          || ( queryRes.error && queryRes.error.code !== 40001 )
+        ) break retryLoop;
+        _try++;
       };
-      res.sendStatus( 204 );
+        if( _try === 5 ) return res.status( 500 ).json( retry_failed );
+      };
+
+      console.log( queryRes );
+
+      if( !queryRes[ 1 ] ) res.sendStatus( 403 );
+      else res.sendStatus( 204 );
+
     }catch( err ){
-      await res.locals.tran.rollback();
       next( err );
     };
   }
