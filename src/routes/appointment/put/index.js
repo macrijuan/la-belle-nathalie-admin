@@ -292,8 +292,7 @@ router.put( "/put_appointment/:appoId",
             FROM unnest($2::int[]) AS recived_ss(id)
             JOIN joined_sub_servs jss
               ON
-                recived_ss.id = ss."subServiceId"
-                AND ss."appointmentId" = $1
+                recived_ss.id = jss."subServiceId"
           ),
           validations AS (
             SELECT
@@ -340,6 +339,7 @@ router.put( "/put_appointment/:appoId",
       let queryRes = await conn.query( query, { bind: bindArgs, type: "UPDATE" } );
         
       if( queryRes.error && queryRes.error.code === 40001 ){//CockroachDB asking for retry
+        console.log( "ENTERS RETRY CASE" );
         let _try = 1;
         retryLoop: while( _try < 5 ){
         queryRes = await conn.query( query, { bind: bindArgs, type: "UPDATE" } );
