@@ -21,27 +21,7 @@ router.put( "/update_request/signed_in",
   }),
   async( req, res, next ) => {
     const rawToken = randomBytes( 3 ).toString( "hex" );
-    //send email with token to user
-    try{
-      await transporter.sendMail({
-        from: process.env.EMAIL_ID,
-        to: req.session.user.email,
-        subject: 'La Belle Nathalie: password update process.',
-        text: 'Hey! Here is the token to update the password of your "La Belle Nathalie" account.',
-        html: `
-        <html>
-        <body>
-        <h1>La Belle Nathalie</h1>
-        <h4>Enter the code below in the "token" field.</h4>
-        <h3>${ rawToken }</h3>
-        </body>
-        </html>
-        `
-      });
-    }catch( err ){
-      console.log( err );
-      return res.status( 500 ).json( custom_error( "password", "The email containing the code to update your account's password could not be sent.") );
-    };
+    
     //generate token
     try{
       const hashedToken = await argon2.hash( rawToken, {
@@ -67,6 +47,28 @@ router.put( "/update_request/signed_in",
       res.status( 200 ).send( updateToken[ 0 ][ 0 ].password_update_expiration );
     }catch( err ){
       next( err );
+    };
+
+    //send email with token to user
+    try{
+      await transporter.sendMail({
+        from: process.env.EMAIL_ID,
+        to: req.session.user.email,
+        subject: 'La Belle Nathalie: password update process.',
+        text: 'Hey! Here is the token to update the password of your "La Belle Nathalie" account.',
+        html: `
+        <html>
+        <body>
+        <h1>La Belle Nathalie</h1>
+        <h4>Enter the code below in the "token" field.</h4>
+        <h3>${ rawToken }</h3>
+        </body>
+        </html>
+        `
+      });
+    }catch( err ){
+      console.log( err );
+      return res.status( 500 ).json( custom_error( "password", "The email containing the code to update your account's password could not be sent.") );
     };
   }
 );
