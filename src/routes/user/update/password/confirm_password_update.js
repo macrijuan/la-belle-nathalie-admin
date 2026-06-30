@@ -32,7 +32,6 @@ router.put( "/confirm_update/signed_in",
       if( !user ){
         res.status( 404 ).json( not_found( "User" ) );
       }else{
-        //I could send an email when "no password_update" case informing the owner of the account that someone is trying to sign in their account.
         if( !user.password_update ){ console.log( "hola" ); return res.status( 404 ).json( not_found( "Update password token" ) );}
         if( user.password_update_expiration < Date.now() ){
           await User.update(
@@ -66,8 +65,11 @@ router.put( "/confirm_update/signed_in",
           SET password_update = NULL,
           password_update_expiration = 0,
           password = $1
-          WHERE id = ${req.session.user.id};`,
-          { type:"UPDATE", bind:[ hashedPassword.substring( 31, hashedPassword.length ) ] }
+          WHERE id = $2;`,
+          {
+            type:"UPDATE",
+            bind:[ hashedPassword.substring( 31, hashedPassword.length ), req.session.user.id ]
+          }
         );
         res.sendStatus( 204 );
       };

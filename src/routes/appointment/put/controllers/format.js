@@ -5,6 +5,8 @@ const { idVal } = require("../../../input_validations/appointments.js");
 
 
 const format = ( req, res, next ) => {
+  console.log( req.params );
+  console.log( req.body );
   try{
     if ( !req.body || typeof req.body !== 'object' || Array.isArray( req.body ) ) {
       throw new Error('body must be an object');
@@ -67,6 +69,7 @@ const format = ( req, res, next ) => {
     for( const id of req.body.add ){
       if( req.body.del.includes( id ) ) throw new Error( "IDs can't be present in both body.add and body.del" );
     };
+
 
     next();
 

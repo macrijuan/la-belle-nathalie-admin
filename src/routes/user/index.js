@@ -4,7 +4,8 @@ const getUsers = require("./get_users.js");
 const updateUser = require("./update/index.js");
 const deleteUser = require("./delete/delete_user.js");
 const signOut = require("./delete/sign_out.js");
+const password_reset = require("./update/password/index.js");
 
-router.use( "/user", getUsers, updateUser, deleteUser, signOut );
+router.use( "/user", getUsers, updateUser, deleteUser, signOut, password_reset );
 
 module.exports = router;

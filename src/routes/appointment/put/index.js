@@ -3,7 +3,6 @@ const { Op } = require("sequelize");
 const router = Router();
 
 const format = require("./controllers/format.js");
-const exists = require("./controllers/exists.js");
 
 const { conn, appo_sub_servs } = require("../../../db.js");
 
@@ -30,6 +29,7 @@ router.put( "/put_appointment/:appoId",
           bindArgs = [ Number( req.params.appoId ), req.body.add, req.body.del, req.body.add.length, req.body.del.length ];
           query = `
           WITH
+          
             appo AS (
               SELECT id, day, start_time, end_time, "employeeId", "serviceId"
               FROM appointments
@@ -62,7 +62,7 @@ router.put( "/put_appointment/:appoId",
                 AND
                 NOT EXISTS(
                   SELECT 1
-                  FROM unnest($2::int[]) AS recived_ss(iz|d)
+                  FROM unnest($2::int[]) AS recived_ss(id)
                   JOIN appo_sub_servs
                     ON
                       recived_ss.id = appo_sub_servs."subServiceId"
@@ -158,8 +158,7 @@ router.put( "/put_appointment/:appoId",
             (SELECT ok FROM validations)
             AND (SELECT ok FROM is_possible)
             AND id = (SELECT id FROM appo)
-          ;
-          `;
+          ;`;
 
         }else{
 

@@ -56,9 +56,9 @@ router.put( "/update_request/signed_in",
         SET
           password_update = '${hashedToken.substring( 31, hashedToken.length )}',
           password_update_expiration = ${Date.now() + 600000 }
-        WHERE id = ${req.session.user.id} AND password_update IS NULL
+        WHERE id = $1 AND password_update IS NULL
         RETURNING password_update_expiration;`,
-        { type:"UPDATE" }
+        { type:"UPDATE", bind: [ req.session.user.id ] }
       );
       if( !updateToken[ 1 ] ){
         res.status( 403 ).json( custom_error( "not_found", 'User not found or user already has an "update password" token assigned.' ) );
