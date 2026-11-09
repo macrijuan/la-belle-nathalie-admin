@@ -1,7 +1,6 @@
 const { Router }=require("express");
 const router = Router();
 
-
 const user = require("./user/index.js");
 const appointment = require("./appointment/index.js");
 const employee = require("./employee/index.js");

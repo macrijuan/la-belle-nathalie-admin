@@ -241,6 +241,7 @@ FROM appo_insert;`,
     }
   );
   await res.locals.tran.commit();
+  console.log( t );
   res.json( t );
   }catch( err ){
     await res.locals.tran.rollback();

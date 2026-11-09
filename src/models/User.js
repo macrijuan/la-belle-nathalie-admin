@@ -24,10 +24,10 @@ module.exports = ( sequelize ) => {
       type: STRING( 35 ),
       allowNull: false
     },
-    id_ref:{
-      type: INTEGER,
-      allowNull: false
-    },
+    // id_ref:{
+    //   type: INTEGER,
+    //   allowNull: false
+    // },
     email_update: {
       type: STRING,
       validate: {

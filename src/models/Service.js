@@ -1,4 +1,4 @@
-const { STRING, ARRAY, JSON, TIME } = require("sequelize");
+const { STRING, ARRAY, TIME } = require("sequelize");
 
 module.exports = sequelize=>{
   sequelize.define( "service", {

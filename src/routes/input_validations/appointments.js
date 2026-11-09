@@ -27,7 +27,7 @@ const timeVal = ( time, rutErrs, prop ) => {
 const idVal = ( id, rutErrs, prop ) => {
   if(
     typeof id !== "number"
-    || !Number.isSafeInteger( appo )
+    || !Number.isSafeInteger( id )
     || id > 99999
     || id < 1
   ) rutErrs[ prop ] = invalid_format;
